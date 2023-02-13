@@ -51,3 +51,67 @@ export const signIn = async (req, res) => {
     return res.status(400).json({ sucess: false, message: "Co su co xay ra" });
   }
 };
+
+export const getUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await UserModel.findOne({ _id: id });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ sucess: false, message: "Khong tim thay nguoi dung" });
+    }
+    res.status(200).json({ user });
+  } catch (err) {
+    return res.status(400).json({ sucess: false, err });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const allUser = await UserModel.find();
+    if (!allUser) {
+      return res
+        .status(400)
+        .json({ sucess: false, message: "Khong ton tai nguoi dung nao" });
+    }
+    res.status(200).json({ allUser: allUser });
+  } catch (err) {
+    return res.status(400).json({ sucess: false, err });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await UserModel.findByIdAndDelete({ _id: id });
+    res.status(200).json({ message: "Xoa thanh cong" });
+  } catch (err) {
+    return res.status(400).json({ sucess: false, err });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  const { fullName, phoneNumber, address, major } = req.body;
+  const { id } = req.params;
+  const user = await UserModel.findOne({ _id: id });
+
+  if (fullName) {
+    user.fullName = fullName;
+  }
+  if (phoneNumber) {
+    const checkphone = await UserModel.findOne({ phoneNumber: phoneNumber });
+    if (checkphone) {
+      return res.status(400).json({ message: "SDT da duoc dang ky" });
+    }
+    user.phoneNumber = phoneNumber;
+  }
+  if (address) {
+    user.address = address;
+  }
+  if (major) {
+    user.major = major;
+  }
+  await user.save();
+  res.status(200).json({ message: "Cap  nhat thanh cong", user: user });
+};
