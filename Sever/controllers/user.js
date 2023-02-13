@@ -100,11 +100,17 @@ export const updateUser = async (req, res) => {
       user.fullName = fullName;
     }
     if (phoneNumber) {
-      const checkphone = await UserModel.findOne({ phoneNumber: phoneNumber });
-      if (checkphone) {
-        return res.status(400).json({ message: "SDT da duoc dang ky" });
+      if (user.phoneNumber === phoneNumber) {
+        user.phoneNumber = phoneNumber;
+      } else {
+        const checkphone = await UserModel.findOne({
+          phoneNumber: phoneNumber,
+        });
+        if (checkphone) {
+          return res.status(400).json({ message: "SDT da duoc dang ky" });
+        }
+        user.phoneNumber = phoneNumber;
       }
-      user.phoneNumber = phoneNumber;
     }
     if (address) {
       user.address = address;
@@ -144,3 +150,34 @@ export const changePassword = async (req, res) => {
     return res.status(400).json({ message: "Co su co  xay ra" });
   }
 };
+
+// export const updateUser = async (req, res) => {
+//   const { fullName, phoneNumber, address, major } = req.body;
+//   const { id } = req.params;
+//   if (!fullName || !phoneNumber || !address || !major) {
+//     return res
+//       .status(400)
+//       .json({ success: false, message: "Vui long nhap day du thong tin!" });
+//   }
+
+//   //check phoneNumber
+//   const checkphoneNumber = await UserModel.findOne({ phoneNumber });
+//   if (checkphoneNumber) {
+//     return res
+//       .status(400)
+//       .json({ success: false, message: "So dien thoai da ton tai!" });
+//   }
+//   try {
+//     const updateUser = req.body;
+//     console.log("user", updateUser);
+
+//     const userUpdated = await UserModel.findByIdAndUpdate(id, updateUser);
+//     const user = await userUpdated.save();
+
+//     console.log("userUpdated", userUpdated);
+
+//     res.status(200).json(user);
+//   } catch (err) {
+//     res.status(500).json({ success: false, err: "cap nhat that bai" });
+//   }
+// };
