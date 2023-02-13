@@ -95,23 +95,52 @@ export const updateUser = async (req, res) => {
   const { fullName, phoneNumber, address, major } = req.body;
   const { id } = req.params;
   const user = await UserModel.findOne({ _id: id });
-
-  if (fullName) {
-    user.fullName = fullName;
-  }
-  if (phoneNumber) {
-    const checkphone = await UserModel.findOne({ phoneNumber: phoneNumber });
-    if (checkphone) {
-      return res.status(400).json({ message: "SDT da duoc dang ky" });
+  try {
+    if (fullName) {
+      user.fullName = fullName;
     }
-    user.phoneNumber = phoneNumber;
+    if (phoneNumber) {
+      const checkphone = await UserModel.findOne({ phoneNumber: phoneNumber });
+      if (checkphone) {
+        return res.status(400).json({ message: "SDT da duoc dang ky" });
+      }
+      user.phoneNumber = phoneNumber;
+    }
+    if (address) {
+      user.address = address;
+    }
+    if (major) {
+      user.major = major;
+    }
+    await user.save();
+    res.status(200).json({ message: "Cap  nhat thanh cong", user: user });
+  } catch (err) {
+    return res.status(400).json({ message: "Co su co  xay ra" });
   }
-  if (address) {
-    user.address = address;
+};
+
+export const changePassword = async (req, res) => {
+  const { password, changePassword, confirmPassword } = req.body;
+  const { id } = req.params;
+  const user = await UserModel.findOne({ _id: id });
+  var count = 0;
+  try {
+    if (password !== user.password)
+      return res.status(400).json({ message: "Sai mat khau hien tai" });
+    if (password == changePassword)
+      return res
+        .status(400)
+        .json({ message: "Mat khau khong the trung voi mat khau hien tai" });
+    if (changePassword !== confirmPassword)
+      return res.status(400).json({
+        message: "Mat khau xac nhan phai trung voi mat khau muon thay doi",
+      });
+    user.password = changePassword;
+    user.save();
+    res
+      .status(200)
+      .json({ message: "Thay doi mat khau thanh cong", user: user });
+  } catch (err) {
+    return res.status(400).json({ message: "Co su co  xay ra" });
   }
-  if (major) {
-    user.major = major;
-  }
-  await user.save();
-  res.status(200).json({ message: "Cap  nhat thanh cong", user: user });
 };
